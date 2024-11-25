@@ -1,13 +1,19 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import { URL } from 'url';
-import { HttpMethod, Route, RouteHandler } from '../types/definitions.ts';
+import { HttpMethod, MiddlewareType, Route, RouteHandler } from '../types/definitions.ts';
 
 export class Router {
     private routes: Route[] = [];
+    private middlewares: MiddlewareType[] = [];
 
     // Register routes
     public addRoute(method: HttpMethod, path: string, handler: RouteHandler) {
         this.routes.push({ method, path, handler });
+    }
+
+    // Register middlewares
+    public addMiddleware(middleware: MiddlewareType) {
+        this.middlewares.push(middleware);
     }
 
     // Parse request body
@@ -66,29 +72,41 @@ export class Router {
             const path = url.pathname;
             const body = method === 'POST' || method === 'PATCH' ? await this.parseBody(req) : undefined;
 
-            // Find matching route
-            const match = this.matchRoute(method, path);
+            let index = 0;
+            const runMiddleware = async (): Promise<void> => {
+                if (index < this.middlewares.length) {
+                    await this.middlewares[index++](body, method, url, res, runMiddleware);
+                } else {
+                    const processRoute = async (req: IncomingMessage, res: ServerResponse) => {
+                        // Encontra a rota compatível
+                        const match = this.matchRoute(method, path);
 
-            if (!match) {
-                res.writeHead(404, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ error: 'Not Found' }));
-                return;
+                        if (!match) {
+                            res.writeHead(404, { 'Content-Type': 'application/json' });
+                            res.end(JSON.stringify({ error: 'Not Found' }));
+                            return;
+                        }
+                    
+                        // Extrai os parâmetros da URL
+                        const queryParams: Record<string, string> = {};
+                        url.searchParams.forEach((value, key) => {
+                            queryParams[key] = value;
+                        });
+                    
+                        // Chama o handler da rota
+                        await match.route.handler(req, res, {
+                            queryParams,
+                            pathParams: match.params,
+                            body
+                        });
+                    }
+
+                    await processRoute(req, res);
+                };
             }
-
-            // Parse query parameters
-            const queryParams: Record<string, string> = {};
-            url.searchParams.forEach((value, key) => {
-                queryParams[key] = value;
-            });
-
-            // Call route handler
-            await match.route.handler(req, res, {
-                queryParams,
-                pathParams: match.params,
-                body
-            });
-
+            await runMiddleware();
         } catch (error) {
+            console.error(error);
             res.writeHead(500, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ error: 'Internal Server Error' }));
         }

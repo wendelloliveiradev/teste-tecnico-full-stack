@@ -1,84 +1,92 @@
-import { ServerResponse } from "http";
-import { ConfirmRideRequestDTO, EstimateRideRequestDTO } from "../types/definitions.ts";
+import { ConfirmRideRequestDTO, EstimateRideRequestDTO, HttpError, MiddlewareType } from "../types/definitions.ts";
 import { drivers } from "../utils/static-data.ts";
 
 function validateNotBlank(value: string): boolean {
-    if (!value || value.trim().length === 0) {
-        return false;
+    // Retorna true se o valor não for nulo e não for uma string vazia
+    return !(!value || value.trim().length === 0);
+}
+
+function isValidAddresses(origin: string, destination: string): boolean {
+    // Retorna true se os endereços de origem e destino forem diferentes
+    return !(origin.trim().toLowerCase() === destination.trim().toLowerCase());
+}
+
+function isValidDriver(driver_id: number, driver_name?: string): boolean {
+    // Retorna true se o driver_id informado estiver presente na lista de motoristas.
+    // Caso o nome do motorista seja informado, retorna true se o id e o nome do motorista forem encontrados.
+    let res: boolean = false;
+    if (driver_name) {
+        res = drivers.some(driver => driver.id === driver_id && driver.name === driver_name);
+    } else {   
+        res = drivers.some(driver => driver.id === driver_id);
     }
-    return true;
+
+    return res;
 }
 
-function validateAddresses(origin: string, destination: string): boolean {
-    if (origin.trim().toLowerCase() === destination.trim().toLowerCase()) {
-        // Add error to result
-        return false;
-    }
-    return true;
-}
-
-function isValidDriver(driverId: number): boolean {
-    return drivers.some(driver => driver.id === driverId);
-}
-
-function isValidDistanceForDriver(driverId: number, distance: number): boolean {
-    const driver = drivers.find(driver => driver.id === driverId);
+function isValidDistanceForDriver(driver_id: number, distance: number): boolean {
+    // Retorna true se a distância informada for maior ou igual à distância mínima aceita pelo motorista.
+    const driver = drivers.find(driver => driver.id === driver_id);
     return driver ? distance >= driver.min_km : false;
 }
 
 function validateEstimateRide(data: EstimateRideRequestDTO) {
-    validateNotBlank(data.customer_id);
-    validateNotBlank(data.origin);
-    validateNotBlank(data.destination);
-    validateAddresses(data.origin, data.destination);
-    
-    return 'result';
+    if (!(validateNotBlank(data.customer_id) && validateNotBlank(data.origin) && validateNotBlank(data.destination))) {
+        throw new HttpError(400, "INVALID_DATA", "Os dados fornecidos no corpo da requisição são inválidos");
+    }
+    if (!isValidAddresses(data.origin, data.destination)) {
+        throw new HttpError(400, "INVALID_DATA", "Os dados fornecidos no corpo da requisição são inválidos");
+    }
 }
 
 function validateConfirmRide(data: ConfirmRideRequestDTO) {
-    validateNotBlank(data.customer_id);
-    validateNotBlank(data.origin);
-    validateNotBlank(data.destination);
-    validateAddresses(data.origin, data.destination);
+    if (!(validateNotBlank(data.customer_id) && validateNotBlank(data.origin) && validateNotBlank(data.destination))) {
+        throw new HttpError(400, "INVALID_DATA", "Os dados fornecidos no corpo da requisição são inválidos");
+    }
+    if (!isValidAddresses(data.origin, data.destination)) {
+        throw new HttpError(400, "INVALID_DATA", "Os dados fornecidos no corpo da requisição são inválidos");
+    }
 
     // Valida se um motorista foi informado e se ele é válido
-    if (!(data.driver && isValidDriver(data.driver.id))) {
-        return 'Driver information is required';
+    if (!(data.driver && isValidDriver(data.driver.id, data.driver.name))) {
+        throw new HttpError(404, "DRIVER_NOT_FOUND", "Motorista não encontrado");
     }
 
     if (!isValidDistanceForDriver(data.driver.id, data.distance)) {
-        return 'Invalid distance for this driver';
+        throw new HttpError(406, "INVALID_DISTANCE", "Quilometragem inválida para o motorista");
     }
 }
 
 function validateGetRides(customer_id: string, driver_id?: number) {
-    validateNotBlank(customer_id);
-    if (driver_id && !isValidDriver(driver_id)) {
-        return 'Invalid driver';
+    if (!(validateNotBlank(customer_id))) {
+        throw new HttpError(400, "INVALID_DATA", "Os dados fornecidos no corpo da requisição são inválidos");
+    }
+
+    // Valida se o motorista informado é válido
+    if (driver_id) {
+        if (!isValidDriver(driver_id)) {
+            throw new HttpError(400, 'INVALID_DRIVER', 'Motorista invalido');
+        }
     }
 }
 
-function validatorMiddleware(res: ServerResponse, path: string, body: any,  next: () => void) {
-    let error: string | undefined;
-    const {customer_id, driver_id} = body;
+export const validatorMiddleware: MiddlewareType = async (body, method, url, _res,  next) => {
+    const path = url.pathname;
+    const driver_id = url.searchParams.has('driver_id') ? +url.searchParams.get('driver_id')! : undefined;
+    const customer_id = method === "GET" ? path.split('/')[2] : "0";
+    const method_path = method === "GET" ? method : `${method} ${path}`;
 
-    switch (path) {
-        case '/ride/estimate':
-            error = validateEstimateRide(body);
+    switch (method_path) {
+        case 'POST /ride/estimate':
+            validateEstimateRide(body);
             break;
-        case '/ride/confirm':
-            error = validateConfirmRide(body);
+        case 'PATCH /ride/confirm':
+            validateConfirmRide(body);
             break;
-        case '/ride/{customer_id}':
-            error = validateGetRides(customer_id, driver_id);
+        case 'GET':
+            validateGetRides(customer_id, driver_id);
             break;
     }
 
-    if (error) {
-        res.statusCode = 400;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ error }));
-    } else {
-        next();
-    }
+    next();
 }

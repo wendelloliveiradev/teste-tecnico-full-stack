@@ -75,23 +75,23 @@ export interface ConfirmRideError_INVALID_DISTANCE_DTO {
 /* End Confirming ride DTOs */
 
 /* Getting rides DTOs */
+export type RideObject = {
+    "id": number,
+    "date": string,
+    "origin": string,
+    "destination": string,
+    "distance": number,
+    "duration": string,
+    "driver": {
+        "id": number,
+        "name": string
+    },
+    "value": number
+}
+
 export interface GetRidesResponseDTO {
     "customer_id": string,
-    "rides": [
-        {
-            "id": number,
-            "date": string,
-            "origin": string,
-            "destination": string,
-            "distance": number,
-            "duration": string,
-            "driver": {
-                "id": number,
-                "name": string
-            },
-            "value": number
-        }
-    ]
+    "rides": RideObject[]
 }
 
 export interface GetRideError_INVALID_DRIVER_DTO {
@@ -136,3 +136,14 @@ export interface Route {
     handler: RouteHandler;
 }
 /* End Router types definition */
+
+/* Using Middlewares */
+export class HttpError extends Error {
+    constructor(public statusCode: number, public error_code: string, error_description: string) {
+        super(error_description);
+    }
+}
+
+export type MiddlewareType = (body: any, method: HttpMethod, url: URL, res: ServerResponse, next: () => Promise<void>) => Promise<void>;
+
+/* End Using Middlewares */

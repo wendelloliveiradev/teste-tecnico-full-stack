@@ -1,13 +1,12 @@
 import { IncomingMessage, ServerResponse } from "node:http";
+import { MiddlewareType } from "../types/definitions.ts";
 
-type NextFunction = () => void;
-
-function loggingMiddleware(req: IncomingMessage, res: ServerResponse, next: NextFunction) {
+export const loggingMiddleware: MiddlewareType = async (body, method, path, res, next) => {
     const start = Date.now();
     
     res.on('finish', () => {
         const elapsed = Date.now() - start;
-        console.log(`${req.method} ${req.url} ${res.statusCode} ${elapsed}ms`);
+        console.log(`${method} at ${path} with body ${JSON.stringify(body)} was finished with ${res.statusCode} in ${elapsed}ms`);
     });
 
     next();

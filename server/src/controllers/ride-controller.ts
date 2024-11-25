@@ -26,9 +26,9 @@ abstract class BaseController {
     public estimateRide = async (req: IncomingMessage, res: ServerResponse, params: RouteParams) => {
       try {
           const { body } = params;
-          const estimate = this.estimate_service.getEstimate(body as EstimateRideRequestDTO);
+          //const estimate = await this.estimate_service.getEstimate(body);
 
-          this.sendSuccess(res, estimate);
+          this.sendSuccess(res, { success: true });
       } catch (error) {
           this.sendError(res, { error: 'Invalid request' });
       }
@@ -37,11 +37,11 @@ abstract class BaseController {
     public confirmRide = async (req: IncomingMessage, res: ServerResponse, params: RouteParams) => {
       try {
           const { body } = params;
-          const confirmation = this.confirmation_service.confirmRide(body as ConfirmRideRequestDTO);
+          const confirmation = await this.confirmation_service.confirmRide(body);
 
           this.sendSuccess(res, confirmation);
       } catch (error) {
-          this.sendError(res, { error: 'Invalid request' });
+          this.sendError(res, { error: 'Invalid request body error' });
       }
   }
 
@@ -51,7 +51,7 @@ abstract class BaseController {
           const customer_id = pathParams.customer_id;
           const driver_id = queryParams.driver_id ?? undefined;
 
-          const rides = this.get_rides_service.getRides(customer_id, driver_id);
+          const rides = await this.get_rides_service.getRides(customer_id, driver_id);
 
           this.sendSuccess(res, rides);
       } catch (error) {
