@@ -1,6 +1,6 @@
 import SqlBricks from "sql-bricks";
 import { GetRidesResponseDTO, IGetRidesService, RideObject } from "../types/definitions.ts";
-import { select } from "../utils/db.ts";
+import { select } from "../data/db.ts";
 
 export class GetRidesService implements IGetRidesService {
     public async getRides(customer_id: string, driver_id?: string): Promise<GetRidesResponseDTO> {
@@ -40,6 +40,9 @@ export class GetRidesService implements IGetRidesService {
           },
           value: ride.value,
         }));
+
+        // Inverte o array rides
+        rides.reverse();
       
         return {
           customer_id: customerId,

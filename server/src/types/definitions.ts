@@ -7,6 +7,18 @@ export interface EstimateRideRequestDTO {
     "destination": string
 }
 
+export interface DriverOptionObject {
+    "id": number,
+    "name": string,
+    "description": string,
+    "vehicle": string,
+    "review": {
+        "rating": number,
+        "comment": string
+    },
+    "value": number
+}
+
 export interface EstimateRideResponseDTO {
     "origin": {
         "latitude": number,
@@ -18,25 +30,41 @@ export interface EstimateRideResponseDTO {
     },
     "distance": number,
     "duration": string,
-    "options": [
-        {
-            "id": number,
-            "name": string,
-            "description": string,
-            "vehicle": string,
-            "review": {
-                "rating": number,
-                "comment": string
-            },
-            "value": number
-        }
-    ],
+    "options": DriverOptionObject[],
     "routeResponse": object
 }
 
 export interface EstiamteRideError_INVALID_DATA_DTO {
     "error_code": "INVALID_DATA",
     "error_description": string
+}
+
+export interface GoogleApiRoutesResponse {
+    "routes": [
+        {
+            "legs": [
+                {
+                    "startLocation": {
+                        "latLng": {
+                            "latitude": number,
+                            "longitude": number
+                        }
+                    },
+                    "endLocation": {
+                        "latLng": {
+                            "latitude": number,
+                            "longitude": number
+                        }
+                    }
+                }
+            ],
+            "distanceMeters": number,
+            "duration": string,
+            "polyline": {
+                "encodedPolyline": string
+            }
+        }
+    ]
 }
 /* End Estimating ride DTOs */
 

@@ -1,12 +1,10 @@
 import "./App.css";
-import EstimateRideScreen from "./pages/estimate-ride-screen";
+import ScreenController from "./pages/screen-controller";
 
 function App() {
   return (
-    <main className="flex w-full h-full justify-center items-center">
-      <EstimateRideScreen />
-      {/* <ConfirmRideScreen />
-      <GetRidesScreen /> */}
+    <main className="flex flex-col gap-4 w-full h-full justify-center items-center">
+      <ScreenController />
     </main>
   );
 }

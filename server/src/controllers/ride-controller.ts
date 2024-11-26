@@ -2,14 +2,18 @@ import { IncomingMessage, ServerResponse } from "node:http";
 import { ConfirmRideRequestDTO, EstimateRideRequestDTO, IConfirmationService, IEstimateService, IGetRidesService, RouteParams } from "../types/definitions.ts";
 
 abstract class BaseController {
-    protected sendSuccess(res: ServerResponse, data: any, status: number = 200) {
-        res.writeHead(status, { 'Content-Type': 'application/json' });
+    protected sendSuccess(res: ServerResponse, data: any) {
+        res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(data));
     }
 
-    protected sendError(res: ServerResponse, error: Object, status: number = 400) {
-        res.writeHead(status, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify(error));
+    protected sendError(res: ServerResponse) {
+        if (!res.headersSent) {
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: 'Internal Server Error', message: "Something Went Wrong on the Server." }));
+        } else {
+            console.error('Headers already sent.');
+        }
     }
 }
   
@@ -25,23 +29,21 @@ abstract class BaseController {
 
     public estimateRide = async (req: IncomingMessage, res: ServerResponse, params: RouteParams) => {
       try {
-          const { body } = params;
-          //const estimate = await this.estimate_service.getEstimate(body);
+            const estimate = await this.estimate_service.getEstimate(params.body);
 
-          this.sendSuccess(res, { success: true });
+            this.sendSuccess(res, estimate);
       } catch (error) {
-          this.sendError(res, { error: 'Invalid request' });
+          this.sendError(res);
       }
   }
 
     public confirmRide = async (req: IncomingMessage, res: ServerResponse, params: RouteParams) => {
       try {
-          const { body } = params;
-          const confirmation = await this.confirmation_service.confirmRide(body);
+        const confirmation = await this.confirmation_service.confirmRide(params.body);
 
           this.sendSuccess(res, confirmation);
       } catch (error) {
-          this.sendError(res, { error: 'Invalid request body error' });
+          this.sendError(res);
       }
   }
 
@@ -55,7 +57,7 @@ abstract class BaseController {
 
           this.sendSuccess(res, rides);
       } catch (error) {
-          this.sendError(res, { error: 'Invalid request' });
+          this.sendError(res);
       }
   }
 }

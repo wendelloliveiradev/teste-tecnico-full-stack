@@ -1,5 +1,5 @@
 import { ConfirmRideRequestDTO, ConfirmRideResponseDTO, IConfirmationService } from "../types/definitions.ts";
-import { insert } from "../utils/db.ts";
+import { insert } from "../data/db.ts";
 
 export class ConfirmationService implements IConfirmationService {
     public async confirmRide(body: ConfirmRideRequestDTO): Promise<ConfirmRideResponseDTO> {

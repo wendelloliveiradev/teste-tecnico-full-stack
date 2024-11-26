@@ -1,5 +1,5 @@
 import { ConfirmRideRequestDTO, EstimateRideRequestDTO, HttpError, MiddlewareType } from "../types/definitions.ts";
-import { drivers } from "../utils/static-data.ts";
+import { drivers } from "../data/static-data.ts";
 
 function validateNotBlank(value: string): boolean {
     // Retorna true se o valor não for nulo e não for uma string vazia

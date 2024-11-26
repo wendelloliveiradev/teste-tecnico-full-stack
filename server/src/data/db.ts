@@ -24,13 +24,10 @@ export function insert(table: string, item: Record<string, string>) {
 
   const {text, values} = SqlBricks.insert(table, item).toParams({ placeholder: '?' });
 
-  const res = database.prepare(text).run(...values);
-
-  console.log(res);
+  database.prepare(text).run(...values);
 }
 
 export function select(query: string) {
-  console.log(query);
   return database.prepare(query).all();
 }
 

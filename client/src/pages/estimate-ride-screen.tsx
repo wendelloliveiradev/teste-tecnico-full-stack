@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 
 export default function EstimateRideScreen() {
   return (
-    <section className="flex h-4/5 w-[55%] bg-zinc-100 rounded-2xl border border-zinc-300 shadow-[15px_15px_15px_-15px_rgba(0,0,0,0.3)] justify-center items-center font-bold">
+    <section className="flex h-[43rem] w-[70rem] bg-zinc-100 rounded-2xl border border-zinc-300 shadow-[15px_15px_15px_-15px_rgba(0,0,0,0.3)] justify-center items-center font-bold">
       <div className="flex h-full w-3/5 rounded-s-2xl justify-center items-center">
         <EstimateRideForm />
       </div>
@@ -32,10 +32,10 @@ function EstimateRideForm() {
       message: "ID do usuário não pode estar em branco.",
     }),
     origin: z.string().min(1, {
-      message: "Origem não pode estar em branco.",
+      message: "Endereço de origem não pode estar em branco.",
     }),
     destination: z.string().min(1, {
-      message: "Destino não pode estar em branco.",
+      message: "Endereço de destino não pode estar em branco.",
     }),
   });
 
@@ -69,7 +69,11 @@ function EstimateRideForm() {
                 <FormItem className="flex flex-col justify-start">
                   <FormLabel className="w-fit">ID do Usuário:</FormLabel>
                   <FormControl>
-                    <Input placeholder="Insira o id do usuário" {...field} />
+                    <Input
+                      className="placeholder:text-zinc-300 focus-visible:ring-emerald-400"
+                      placeholder="Insira o id do usuário"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -82,7 +86,11 @@ function EstimateRideForm() {
                 <FormItem className="flex flex-col justify-start">
                   <FormLabel className="w-fit">Endereço de Origem:</FormLabel>
                   <FormControl>
-                    <Input placeholder="Insira o endereço de origem" {...field} />
+                    <Input
+                      className="placeholder:text-zinc-300 focus-visible:ring-emerald-400"
+                      placeholder="Insira o endereço de origem"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -90,18 +98,27 @@ function EstimateRideForm() {
             />
             <FormField
               control={form.control}
-              name="customer_id"
+              name="destination"
               render={({ field }) => (
                 <FormItem className="flex flex-col justify-start">
                   <FormLabel className="w-fit">Endereço de Destino:</FormLabel>
                   <FormControl>
-                    <Input placeholder="Insira o endereço de destino" {...field} />
+                    <Input
+                      className="placeholder:text-zinc-300 focus-visible:ring-emerald-400"
+                      placeholder="Insira o endereço de destino"
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit">Estimar Valor</Button>
+            <Button
+              className="bg-green-400 text-lg text-black font-bold border border-green-600 hover:bg-green-500"
+              type="submit"
+            >
+              Estimar Valor
+            </Button>
           </form>
         </Form>
       </CardContent>

@@ -1,4 +1,4 @@
-type Driver = {
+export type Driver = {
     id: number,
     name: string,
     description: string,
