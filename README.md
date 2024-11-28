@@ -7,14 +7,7 @@ Este projeto é uma aplicação simples de carona compartilhada construída com 
 - [Visão Geral](#visão-geral)
 - [Funcionalidades](#funcionalidades)
 - [Tecnologias Utilizadas](#tecnologias-utilizadas)
-- [Como Começar](#como-começar)
-  - [Pré-requisitos](#pré-requisitos)
-  - [Instalação](#instalação)
-  - [Executando a Aplicação](#executando-a-aplicação)
 - [Endpoints](#endpoints)
-- [Configuração do Docker](#configuração-do-docker)
-- [Testes](#testes)
-- [Licença](#licença)
 
 ## Visão Geral
 
@@ -36,11 +29,12 @@ Este projeto simula um sistema simples de carona compartilhada onde os usuários
   - TypeScript
   - SQLite (para armazenar os dados de viagem)
   - Servidor HTTP simples (usando o módulo `http`)
-  - SQLite3
+  - Google Maps API Routes
 - **Frontend**:
   - React.js
   - ShadcnUI
   - Zod
+  - React Query
   - react-hook-form
   - Vite (para desenvolvimento rápido e bundling)
   - Tailwind CSS (para estilização)
@@ -57,12 +51,3 @@ Antes de rodar esta aplicação, garanta que você tenha as seguintes ferramenta
 - **Docker**: Para rodar a aplicação em containers.
 - **Node.js**: Para desenvolvimento local e build.
 - **Google Maps API Key**: Para integrar a API do Google Maps nas estimativas de viagem.
-
-### Instalação
-
-Clone o repositório:
-
-```bash
-git clone https://github.com/seu-usuario/ride-hailing-app.git
-cd ride-hailing-app
-```
