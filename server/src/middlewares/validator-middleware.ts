@@ -1,5 +1,5 @@
-import { ConfirmRideRequestDTO, EstimateRideRequestDTO, HttpError, MiddlewareType } from "../types/definitions.ts";
-import { drivers } from "../data/static-data.ts";
+import { ConfirmRideRequestDTO, EstimateRideRequestDTO, HttpError, MiddlewareType } from "../types/definitions.js";
+import { drivers } from "../data/static-data.js";
 
 function validateNotBlank(value: string): boolean {
     // Retorna true se o valor não for nulo e não for uma string vazia
@@ -27,7 +27,8 @@ function isValidDriver(driver_id: number, driver_name?: string): boolean {
 function isValidDistanceForDriver(driver_id: number, distance: number): boolean {
     // Retorna true se a distância informada for maior ou igual à distância mínima aceita pelo motorista.
     const driver = drivers.find(driver => driver.id === driver_id);
-    return driver ? distance >= driver.min_km : false;
+    const distance_in_km = distance / 1000;
+    return driver ? distance_in_km >= driver.min_km : false;
 }
 
 function validateEstimateRide(data: EstimateRideRequestDTO) {

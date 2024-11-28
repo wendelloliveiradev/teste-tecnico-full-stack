@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import { URL } from 'url';
-import { HttpMethod, MiddlewareType, Route, RouteHandler } from '../types/definitions.ts';
+import { HttpMethod, MiddlewareType, Route, RouteHandler } from '../types/definitions.js';
 
 export class Router {
     private routes: Route[] = [];

@@ -8,6 +8,9 @@ export type Driver = {
     min_km: number,
 }
 
+// Dados estáticos dos motoristas, para simular um banco de dados.
+// Os dados reais seriam obtidos de um banco de dados ou API.
+// Muito útil para testes e desenvolvimento.
 export const drivers: Driver[] = [
     {
         id: 1,

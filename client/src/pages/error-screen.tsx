@@ -1,11 +1,7 @@
 import { Button } from "@/components/ui/button";
-import React from "react";
+import { ReactNode } from "react";
 
-interface ErrorScreenProps {
-  message?: string;
-}
-
-const ErrorScreen: React.FC<ErrorScreenProps> = ({ message }) => {
+export default function ErrorScreen({ message }: { message?: string }): ReactNode {
   const handleReload = () => {
     window.location.reload();
   };
@@ -24,6 +20,4 @@ const ErrorScreen: React.FC<ErrorScreenProps> = ({ message }) => {
       </Button>
     </section>
   );
-};
-
-export default ErrorScreen;
+}

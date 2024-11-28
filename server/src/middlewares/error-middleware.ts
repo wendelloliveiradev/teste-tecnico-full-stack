@@ -1,5 +1,6 @@
-import { HttpError, MiddlewareType } from "../types/definitions.ts";
+import { HttpError, MiddlewareType } from "../types/definitions.js";
 
+/* Um simples middleware que lida com possíveis erros durante o uso do middleware de validação */
 export const errorHandlerMiddleware: MiddlewareType = async (_body, _method, _path, res, next) => {
     try {
         await next();

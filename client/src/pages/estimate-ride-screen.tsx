@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Form,
@@ -7,12 +8,16 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { ScreenSwitcherContext } from "@/contexts/sreen-switcher-context";
+import { EstimateRideFormValues } from "@/lib/definitions";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useContext } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 
+// Componente principal da tela de estimativa de viagem
 export default function EstimateRideScreen() {
   return (
     <section className="flex h-[43rem] w-[70rem] bg-zinc-100 rounded-2xl border border-zinc-300 shadow-[15px_15px_15px_-15px_rgba(0,0,0,0.3)] justify-center items-center font-bold">
@@ -26,19 +31,51 @@ export default function EstimateRideScreen() {
   );
 }
 
+// Componente do formulário de estimativa de viagem
 function EstimateRideForm() {
-  const formSchema = z.object({
-    customer_id: z.string().min(1, {
-      message: "ID do usuário não pode estar em branco.",
-    }),
-    origin: z.string().min(1, {
-      message: "Endereço de origem não pode estar em branco.",
-    }),
-    destination: z.string().min(1, {
-      message: "Endereço de destino não pode estar em branco.",
-    }),
+  const screen_context = useContext(ScreenSwitcherContext);
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: async (data: EstimateRideFormValues) => {
+      const response = await fetch(`http://127.0.0.1:8080/ride/estimate`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      screen_context.setEstimateResponse(data);
+      screen_context.setShowScreen("confirm");
+    },
+    onError: (error) => {
+      screen_context.setShowScreen("error");
+      console.error("An error occurred while estimating the ride", error);
+    },
   });
 
+  const formSchema = z
+    .object({
+      customer_id: z.string().min(1, {
+        message: "ID do usuário não pode estar em branco.",
+      }),
+      origin: z.string().min(1, {
+        message: "Endereço de origem não pode estar em branco.",
+      }),
+      destination: z.string().min(1, {
+        message: "Endereço de destino não pode estar em branco.",
+      }),
+    })
+    .refine((data) => data.origin !== data.destination, {
+      message: "Um endereço de origem não pode ser igual ao endereço de destino.",
+      path: ["destination"],
+    });
+
+  // Cria o formulário com base no schema
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -48,10 +85,34 @@ function EstimateRideForm() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  // Função de submissão do formulário
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      const response_data = await queryClient.fetchQuery({
+        queryKey: ["api_config"],
+        queryFn: async () => {
+          const url = `http://127.0.0.1:8080/api/config`;
+
+          const response = await fetch(url, {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+
+          return await response.json();
+        },
+      });
+
+      screen_context.setApiConfig(response_data.googleApiKey);
+    } catch (error) {
+      screen_context.setShowScreen("error");
+      console.error("Error fetching data:", error);
+    }
+
+    screen_context.setShowScreen("loading");
+    screen_context.setEstimateRequest(values);
+    mutation.mutate(values);
   }
 
   return (

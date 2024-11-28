@@ -1,23 +1,25 @@
-import { ReactNode } from "react";
+import { ReactNode, useContext } from "react";
 import ConfirmRideScreen from "./confirm-ride-screen";
 import ErrorScreen from "./error-screen";
 import EstimateRideScreen from "./estimate-ride-screen";
 import GetRidesScreen from "./get-rides-screen";
 import LoadingScreen from "./loading-screen";
+import { ScreenSwitcherContext } from "@/contexts/sreen-switcher-context";
 
-type ScreenSwitcherProps = {
-  screen: "estimate" | "confirm" | "get" | "loading" | "error";
-};
+export default function ScreenController(): ReactNode {
+  const switch_screen_context = useContext(ScreenSwitcherContext);
 
-export default function ScreenController() {
-  const screen_maps: Record<string, ReactNode> = {
+  // Mapeia os nomes das telas para os componentes correspondentes
+  const screens_map: Record<string, ReactNode> = {
     estimate: <EstimateRideScreen />,
     confirm: <ConfirmRideScreen />,
     get: <GetRidesScreen />,
     loading: <LoadingScreen />,
     error: <ErrorScreen />,
   };
-  const title_maps: Record<string, string> = {
+
+  // Mapeia os nomes das telas para os títulos correspondentes
+  const titles_map: Record<string, string> = {
     estimate: "Solicitar Viagem",
     confirm: "Opções de Viagens",
     get: "Histórico de Viagens",
@@ -27,8 +29,10 @@ export default function ScreenController() {
 
   return (
     <>
-      <h1 className="w-[70rem] text-4xl font-bold text-start">Solicitar Viagem</h1>
-      {screen_maps["get"]}
+      <h1 className="w-[70rem] text-4xl font-bold text-start">
+        {titles_map[switch_screen_context.show_screen]}
+      </h1>
+      {screens_map[switch_screen_context.show_screen]}
     </>
   );
 }

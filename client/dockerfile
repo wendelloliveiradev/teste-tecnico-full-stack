@@ -1,0 +1,22 @@
+# Estágio 1: Fase de construção
+FROM node:18 AS builder
+WORKDIR /app
+
+# Instalação das dependências e compilação do código
+COPY package.json pnpm-lock.yaml ./
+RUN npm install -g pnpm && pnpm install
+COPY . .
+RUN npm run build
+
+# Estágio 2: Fase de execução
+FROM nginx:alpine AS runtime
+WORKDIR /usr/share/nginx/html
+
+# Copiar o código compilado para o NGINX
+COPY --from=builder /app/dist .
+
+# Expõe a porta 80
+EXPOSE 80
+
+# Inicia NGINX
+CMD ["nginx", "-g", "daemon off;"]

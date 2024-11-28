@@ -4,7 +4,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "tsx watch --experimental-sqlite ./src/server.ts"
+    "dev": "tsx watch --experimental-sqlite ./src/server.ts",
+    "clean": "rm -rf dist",
+    "build": "npm run clean && tsc",
+    "start": "node dist/server.js"
   },
   "keywords": [],
   "author": "",
@@ -12,11 +15,13 @@
   "description": "",
   "devDependencies": {
     "@types/node": "^22.9.3",
-    "tsx": "^4.19.2",
-    "typescript": "^5.7.2"
+    "tsx": "^4.19.2"
   },
   "dependencies": {
     "axios": "^1.7.8",
-    "sql-bricks": "^3.0.1"
+    "dotenv": "^16.4.5",
+    "sql-bricks": "^3.0.1",
+    "sqlite3": "^5.1.7",
+    "typescript": "^5.7.2"
   }
 }

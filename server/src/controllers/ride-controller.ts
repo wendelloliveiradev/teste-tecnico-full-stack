@@ -1,5 +1,5 @@
 import { IncomingMessage, ServerResponse } from "node:http";
-import { ConfirmRideRequestDTO, EstimateRideRequestDTO, IConfirmationService, IEstimateService, IGetRidesService, RouteParams } from "../types/definitions.ts";
+import { IConfirmationService, IEstimateService, IGetRidesService, RouteParams } from "../types/definitions.js";
 
 abstract class BaseController {
     protected sendSuccess(res: ServerResponse, data: any) {
@@ -27,7 +27,7 @@ abstract class BaseController {
         super();
     }
 
-    public estimateRide = async (req: IncomingMessage, res: ServerResponse, params: RouteParams) => {
+    public estimateRide = async (_req: IncomingMessage, res: ServerResponse, params: RouteParams) => {
       try {
             const estimate = await this.estimate_service.getEstimate(params.body);
 
@@ -37,7 +37,7 @@ abstract class BaseController {
       }
   }
 
-    public confirmRide = async (req: IncomingMessage, res: ServerResponse, params: RouteParams) => {
+    public confirmRide = async (_req: IncomingMessage, res: ServerResponse, params: RouteParams) => {
       try {
         const confirmation = await this.confirmation_service.confirmRide(params.body);
 
@@ -47,13 +47,19 @@ abstract class BaseController {
       }
   }
 
-    public getRides = async (req: IncomingMessage, res: ServerResponse, params: RouteParams) => {
+    public getRides = async (_req: IncomingMessage, res: ServerResponse, params: RouteParams) => {
       try {
           const { pathParams, queryParams } = params;
           const customer_id = pathParams.customer_id;
           const driver_id = queryParams.driver_id ?? undefined;
 
           const rides = await this.get_rides_service.getRides(customer_id, driver_id);
+
+          if (rides.rides.length === 0) {
+              res.writeHead(404);
+              res.end(JSON.stringify({"error_code": "NO_RIDES_FOUND", "error_description": "Nenhum registro encontrado"}));
+              return;
+          }
 
           this.sendSuccess(res, rides);
       } catch (error) {

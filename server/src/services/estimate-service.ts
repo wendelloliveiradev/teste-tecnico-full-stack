@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { DriverOptionObject, EstimateRideRequestDTO, EstimateRideResponseDTO, GoogleApiRoutesResponse, IEstimateService } from '../types/definitions.ts';
-import { Driver, drivers } from '../data/static-data.ts';
+import { DriverOptionObject, EstimateRideRequestDTO, EstimateRideResponseDTO, GoogleApiRoutesResponse, IEstimateService } from '../types/definitions.js';
+import { Driver, drivers } from '../data/static-data.js';
 
 export class EstimateRideService implements IEstimateService{
   private url = "https://routes.googleapis.com/directions/v2:computeRoutes";
@@ -20,7 +20,7 @@ export class EstimateRideService implements IEstimateService{
       const response = await axios.post(this.url, resquest_body, {
         headers: {
           "Content-Type": "application/json",
-          "X-Goog-Api-Key": "AIzaSyBYe63aWhH7npwZVXqi-py3jSaLwC01Vss",
+          "X-Goog-Api-Key": process.env.GOOGLE_API_KEY,
           "X-Goog-FieldMask":
             "routes.legs.start_location,routes.legs.end_location,routes.distanceMeters,routes.duration,routes.polyline",
         },
@@ -48,29 +48,29 @@ export class EstimateRideService implements IEstimateService{
       },
       distance: response.routes[0].distanceMeters,
       duration: response.routes[0].duration,
-      options: this.getDriversOptions(response.routes[0].distanceMeters),
+      options: this.getDriversOptions(response.routes[0].distanceMeters/1000),
       routeResponse: response
     };
   }
 
-  private getDriversOptions(distance: number): DriverOptionObject[] {
+  private getDriversOptions(distance_in_km: number): DriverOptionObject[] {
     // Implementa a lógica para retornar os motoristas disponíveis
-    const available_drivers: Driver[] = drivers.filter(driver => driver.min_km <= distance);
+    const available_drivers: Driver[] = drivers.filter(driver => driver.min_km <= distance_in_km);
     let return_drivers: DriverOptionObject[] = [];
     
     return_drivers = available_drivers.map(driver => {
       const rev = driver.review;
-      const i_space = rev.indexOf(" ");
+
       const driver_option: DriverOptionObject = {
         id: driver.id,
         name: driver.name,
         description: driver.description,
         vehicle: driver.car,
         review: {
-          rating: +rev.slice(0, i_space),
-          comment: rev.slice(i_space+1, rev.length),
+          rating: +rev.slice(0, rev.indexOf("/")),
+          comment: rev.slice(rev.indexOf(" "), rev.length),
         },
-        value: parseFloat(driver.rate.replace("R$ ", "").replace("/km", "")) * (distance/1000),
+        value: parseFloat(driver.rate.replace("R$ ", "").replace("/km", "")) * (distance_in_km),
       };
 
       return driver_option;

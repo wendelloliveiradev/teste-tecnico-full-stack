@@ -1,15 +1,9 @@
-export type Driver = {
-    id: number,
-    name: string,
-    description: string,
-    rating?: string,
-    review?: string,
-    pic_src?: string,
-    car?: string,
-    value?: string,
-}
+import { AvailableRideDriver } from "@/lib/definitions";
 
-export const drivers: Driver[] = [
+// Dados estáticos para simular os motoristas disponíveis.
+// Apenas para fins de desenvolvimento e testes.
+// Continuo usando o path para imagem de perfil dos motoristas.
+export const drivers: AvailableRideDriver[] = [
     {
         id: 1,
         name: "Homer Simpson",
@@ -18,7 +12,7 @@ export const drivers: Driver[] = [
         review: "Motorista simpático, mas errou o caminho 3 vezes. O carro cheira a donuts.",
         pic_src: "/pics/homer-profile-pic.svg",
         car: "Plymouth Valiant 1973 rosa e enferrujado",
-        value: "R$ 50,00",
+        value: 50.00,
     },
     {
         id: 2,
@@ -28,7 +22,7 @@ export const drivers: Driver[] = [
         review: "Que viagem incrível! O carro é um show à parte e o motorista, apesar de ter uma cara de poucos amigos, foi super gente boa. Recomendo!",
         pic_src: "/pics/dominic-profile-pic.jpeg",
         car: "Dodge Charger R/T 1970 modificado",
-        value: "R$ 100,00",
+        value: 100.00,
     },
     {
         id: 3,
@@ -38,6 +32,6 @@ export const drivers: Driver[] = [
         review: "Serviço impecável! O motorista é a própria definição de classe e o carro é simplesmente magnífico. Uma experiência digna de um agente secreto.",
         pic_src: "/pics/james-profile-pic.jpg",
         car: "Aston Martin DB5 clássico",
-        value: "R$ 200,00",
+        value: 200.00,
     }
 ]
